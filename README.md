@@ -25,7 +25,7 @@ tag.
 ### INSTALLATION
 
 No configuration other than including the extension is required.  Add a line
-like the one below to the bottom of your `LocalSettinc.php` file.
+like the one below to the bottom of your `LocalSettings.php` file.
 
 > require_once("$IP/extensions/IPCalc/IPCalc.php");
 
