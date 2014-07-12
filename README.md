@@ -32,3 +32,4 @@ like the one below to the bottom of your `LocalSettings.php` file.
 ### TODO LIST
 * Make the namespace number configurable.
 * Add support for netmask attribute (and suffix in article name) instead of CIDR prefix length.
+* Add DNS lookup capabilities to document assigned addresses in a block.
