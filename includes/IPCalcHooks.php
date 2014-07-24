@@ -29,7 +29,7 @@ class IPCalcHooks
   public static function onFunc(Parser $parser, 
                                 $ip = '', $cidr = '', $caption = '')
     {
-      if (empty($ip)) { error_log('missing addr'); return '(missing addr)'; }
+      if (empty($ip)) { return '(missing addr)'; }
  
       if (preg_match('/^(.*)\/(.*)$/', $ip, $m)) { 
         $caption = $cidr;
@@ -42,7 +42,7 @@ class IPCalcHooks
                        '(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.'.
                        '(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)$/', $ip, $m)) {
         $ip = sprintf('%d.%d.%d.%d', $m[1], $m[2], $m[3], $m[4]);
-      } else { error_log("invalid addr; $ip"); return '(invalid addr)'; }
+      } else { return '(invalid addr)'; }
       $ip_bin = IPCalcHooks::ip2bin($ip);
 
       if     (substr($ip_bin, 0, 1) ==    '0') { $class = 'A'; }
@@ -69,11 +69,11 @@ class IPCalcHooks
         $mask = sprintf('%d.%d.%d.%d', $m[1], $m[2], $m[3], $m[4]);
         $mask = IPCalcHooks::ip2bin($mask);
         if (preg_match('/^(1*)0*$/', $mask, $m)) { $cidr = strlen($m[1]); }
-        else { error_log("invalid mask; $cidr"); return '(invalid mask)'; }
+        else { return '(invalid mask)'; }
       }
 
       if ($cidr < 0 || $cidr > 32) 
-        { error_log("invalid CIDR; $cidr"); return "(invalid CIDR)"; }
+        { return "(invalid CIDR)"; }
       
       $nm_bin = str_pad(str_pad('', $cidr, '1'), 32, '0');
       $nm = IPCalcHooks::bin2ip($nm_bin);
@@ -149,15 +149,16 @@ class IPCalcHooks
   public static function onTag($input, array $args, 
                                Parser $parser, PPFrame $frame)
     {
-      $addr = $args['addr']; 
-          if (empty($addr)) { $addr = $args['ip']; }
-      $mask = $args['mask'];
-          if (empty($mask)) { $mask = $args['cidr']; }
-          if (empty($mask)) { $mask = $args['net']; }
-          if (empty($mask)) { $mask = $args['subnet']; }
+      $addr = NULL;
+          if (isset($args['addr']))               { $addr = $args['addr']; }
+          if (empty($addr) && isset($args['ip'])) { $addr = $args['ip']; }
+      $mask = NULL;
+          if (isset($args['mask']))                   { $mask = $args['mask']; }
+          if (empty($mask) && isset($args['cidr']))   { $mask = $args['cidr']; }
+          if (empty($mask) && isset($args['net']))    { $mask = $args['net']; }
       $caption = $input;
-          if (empty($caption)) { $caption = $args['caption']; }
-          if (empty($caption)) { $caption = $args['title']; }
+          if (empty($caption) && isset($args['caption'])) { $caption = $args['caption']; }
+          if (empty($caption) && isset($args['title']))   { $caption = $args['title']; }
       return $parser->recursiveTagParse(self::onFunc($parser, $addr, 
                                                      $mask, $caption));
     }
